@@ -83,6 +83,23 @@ switch:
       command_off: "/usr/sbin/poweroff"
 ```
 
+Additional notes:
+
+When the command_line platform issues a command, it does so as the user homeassistant, with the permissions that this user has. When Home Assistant runs under Hassbian (not sure about other environments), the `poweroff` command requires root privileges, and and would need to be issued in the form `sudo poweroff`. By default, the `sudo` command will ask for a password, so you would need to configure `sudo` to allow the user homeassistant to run specific or all commands without a password.
+
+You do that by logging on to a Hassbian command line (e.g. through SSH) and modifying the sudoers file with
+`sudo visudo`.
+
+Then add the following line in the user privilege specification section:
+
+`homeassistant ALL=(ALL) NOPASSWD: /sbin/poweroff`
+
+If you want to give the user homeassistant the permission to run all commands as root - which is not recommended for security reasons - you would replace the specific command (`/sbin/poweroff`) with `ALL`. You can also list multiple commands, separating them with comma and space. You can use the `whereis` command to find the location of a specific command on the system: `whereis poweroff`. For example, on a Hassbian system, the `poweroff` command is at `/sbin/poweroff`.
+Once you have made these changes, on Hassbian the command to shut down the system is:
+`command_off: "sudo poweroff"`
+
+When you use this switch from within Home Assistant, you may get an error message even though it works correctly, because the system is powered off immediately and cannot give a proper response.
+
 ### {% linkable_title Control your VLC player %}
 
 This switch will control a local VLC media player ([Source](https://community.home-assistant.io/t/vlc-player/106)).
